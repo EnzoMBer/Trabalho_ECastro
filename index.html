@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-M-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counting Sort</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .array-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            min-height: 60px;
+            align-items: center;
+        }
+        .array-cell {
+            border: 1px solid #9ca3af;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            position: relative;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        .array-cell .index {
+            position: absolute;
+            top: -20px;
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+        .array-cell.highlight-read {
+            background-color: #60a5fa;
+            color: white;
+            border-color: #2563eb;
+            transform: scale(1.1);
+        }
+        .array-cell.highlight-write {
+            background-color: #4ade80;
+            color: white;
+            border-color: #16a34a;
+            transform: scale(1.1);
+        }
+        .array-cell.highlight-process {
+            background-color: #facc15;
+            color: #422006;
+            border-color: #ca8a04;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-slate-900">Counting Sort</h1>
+            <p class="mt-2 text-lg text-slate-600">Trabalho feito para mostrar como é feito o Counting Sort.</p>
+        </header>
+
+        <main>
+            <section id="introduction" class="mb-12 bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold mb-4">O que é Counting Sort?</h2>
+                <p class="text-slate-600 leading-relaxed">
+                    Esta seção introduz o conceito fundamental do Counting Sort. É um algoritmo de ordenação que não se baseia em comparações entre elementos, mas sim na contagem da frequência de cada valor no array de entrada. Ele é particularmente eficiente sob certas condições. Ao explorar esta seção, você entenderá sua principal vantagem, a estabilidade, e o cenário ideal para sua aplicação: a ordenação de números inteiros dentro de um intervalo pequeno e conhecido.
+                </p>
+                <div class="mt-6 grid md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-slate-900">🚀 Não Comparativo</h3>
+                        <p class="text-sm text-slate-500 mt-1">Funciona contando a frequência dos elementos, não os comparando entre si.</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-slate-900">🎯 Range Limitado</h3>
+                        <p class="text-sm text-slate-500 mt-1">Ideal quando o intervalo de valores (k) não é significativamente maior que o número de elementos (n).</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-slate-900">✨ Estável</h3>
+                        <p class="text-sm text-slate-500 mt-1">Preserva a ordem original de elementos com valores iguais.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="visualizer" class="mb-12 bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold mb-2">Visualização Interativa</h2>
+                <p class="text-slate-600 mb-6">
+                    Esta é a área central da ferramenta. Aqui, você pode controlar a execução do Counting Sort e observar como os arrays mudam em cada etapa. Use o botão "Próximo Passo" para avançar na animação ou "Reiniciar" para começar de novo. Você pode usar o array de exemplo ou inserir sua própria lista de números (de 0 a 15, separados por vírgula) para ver o algoritmo em ação com dados diferentes. A cada passo, uma explicação contextual aparecerá, detalhando a operação que está sendo realizada.
+                </p>
+
+                <div class="mb-6 flex flex-wrap gap-4 items-center">
+                    <input type="text" id="array-input" class="flex-grow p-2 border rounded-md focus:ring-2 focus:ring-blue-500" value="4, 1, 3, 4, 1, 8, 5, 3">
+                    <div class="flex gap-2">
+                        <button id="start-btn" class="bg-blue-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-600 transition-colors">Ordenar</button>
+                        <button id="next-step-btn" class="bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600 transition-colors" disabled>Próximo Passo</button>
+                        <button id="reset-btn" class="bg-gray-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-gray-600 transition-colors">Reiniciar</button>
+                    </div>
+                </div>
+                
+                <div id="explanation-box" class="mb-6 p-4 bg-slate-100 rounded-md min-h-[50px] text-slate-700 font-mono text-sm">
+                    Clique em "Ordenar" para começar.
+                </div>
+
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="font-semibold mb-2">Array de Entrada (A)</h3>
+                        <div id="input-array-vis" class="array-container"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">Array de Contagem (C)</h3>
+                        <div id="count-array-vis" class="array-container"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">Array de Saída (B)</h3>
+                        <div id="output-array-vis" class="array-container"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="process" class="mb-12 bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold mb-2">O Processo Detalhado</h2>
+                 <p class="text-slate-600 mb-6">
+                    Para reforçar o que foi aprendido na visualização, esta seção detalha os quatro passos fundamentais do algoritmo. Cada passo é explicado de forma clara e concisa, servindo como um guia de referência rápida para solidificar seu entendimento sobre como o array de contagem é preenchido, transformado em uma soma cumulativa e, finalmente, usado para construir o array de saída ordenado.
+                </p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-lg text-slate-900">1. Contagem de Frequência</h3>
+                        <p class="mt-2 text-slate-600">Cria-se um "Array de Contagem" (C) para armazenar a frequência de cada elemento do "Array de Entrada" (A). O índice do array C corresponde ao valor do elemento em A.</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-lg text-slate-900">2. Soma Cumulativa</h3>
+                        <p class="mt-2 text-slate-600">Modifica-se o array C para que cada posição C[i] contenha a soma de suas contagens anteriores. Agora, C[i] indica a posição final do elemento i no array ordenado.</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-lg text-slate-900">3. Construção da Saída</h3>
+                        <p class="mt-2 text-slate-600">Percorre-se o array de entrada A de trás para frente. Cada elemento A[i] é colocado na posição correta no "Array de Saída" (B), conforme indicado pelo array C.</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-lg text-slate-900">4. Decremento</h3>
+                        <p class="mt-2 text-slate-600">Após posicionar um elemento, o valor correspondente no array C é decrementado. Isso garante que elementos duplicados sejam colocados na posição correta (anterior).</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="complexity" class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold mb-2">Análise de Complexidade</h2>
+                <p class="text-slate-600 mb-6">
+                   Finalmente, esta seção resume o desempenho do Counting Sort. Aqui você encontrará as complexidades de tempo e espaço do algoritmo, que são cruciais para decidir quando usá-lo. A análise também destaca a principal limitação do algoritmo: sua dependência do intervalo de valores (k), que pode torná-lo impraticável se o intervalo for muito grande.
+                </p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-lg text-slate-900">⏰ Complexidade de Tempo</h3>
+                        <p class="mt-2 text-3xl font-mono text-blue-600">O(n + k)</p>
+                        <p class="mt-2 text-slate-600">Onde n é o número de elementos e k é o intervalo dos valores de entrada. É linear, o que é extremamente rápido.</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-lg text-slate-900">💾 Complexidade de Espaço</h3>
+                        <p class="mt-2 text-3xl font-mono text-green-600">O(n + k)</p>
+                        <p class="mt-2 text-slate-600">Requer espaço auxiliar para o array de contagem (k) e o array de saída (n).</p>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">
+                    <p><span class="font-bold">Atenção:</span> Se o intervalo k for muito grande (ex: milhões), o algoritmo se torna ineficiente devido ao alto consumo de memória para o array de contagem.</p>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <script>
+        const arrayInputEl = document.getElementById('array-input');
+        const startBtn = document.getElementById('start-btn');
+        const nextStepBtn = document.getElementById('next-step-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const explanationBox = document.getElementById('explanation-box');
+        
+        const inputArrayVis = document.getElementById('input-array-vis');
+        const countArrayVis = document.getElementById('count-array-vis');
+        const outputArrayVis = document.getElementById('output-array-vis');
+
+        let state = {};
+
+        function createCell(value, index, type) {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.dataset.id = `{type}-{index}`;
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.textContent = value;
+            cell.appendChild(valueSpan);
+            
+            const indexSpan = document.createElement('span');
+            indexSpan.className = 'index';
+            indexSpan.textContent = index;
+            cell.appendChild(indexSpan);
+            
+            return cell;
+        }
+
+        function renderArrays() {
+            inputArrayVis.innerHTML = '';
+            state.inputArray.forEach((val, i) => inputArrayVis.appendChild(createCell(val, i, 'input')));
+            
+            countArrayVis.innerHTML = '';
+            state.countArray.forEach((val, i) => countArrayVis.appendChild(createCell(val, i, 'count')));
+
+            outputArrayVis.innerHTML = '';
+            state.outputArray.forEach((val, i) => outputArrayVis.appendChild(createCell(val === undefined ? '' : val, i, 'output')));
+        }
+        
+        function clearHighlights() {
+            document.querySelectorAll('.array-cell').forEach(cell => {
+                cell.classList.remove('highlight-read', 'highlight-write', 'highlight-process');
+            });
+        }
+
+        function highlightCell(type, index, className) {
+            const cell = document.querySelector(`[data-id="{type}-{index}"]`);
+            if (cell) {
+                cell.classList.add(className);
+            }
+        }
+        
+        function updateCell(type, index, value) {
+             const cell = document.querySelector(`[data-id="{type}-{index}"]`);
+             if(cell) {
+                cell.firstChild.textContent = value;
+             }
+        }
+
+        function reset() {
+            const initialArray = arrayInputEl.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 0 && n <= 15);
+            if (initialArray.length === 0) {
+                 explanationBox.textContent = 'Erro: Forneça um array válido com números de 0 a 15.';
+                 return;
+            }
+
+            const maxVal = Math.max(...initialArray);
+
+            state = {
+                initialArray: [...initialArray],
+                inputArray: [...initialArray],
+                countArray: Array(maxVal + 1).fill(0),
+                outputArray: Array(initialArray.length).fill(undefined),
+                phase: 'start',
+                step: 0,
+                generator: null,
+            };
+
+            renderArrays();
+            explanationBox.textContent = 'Estado inicial. Clique em "Próximo Passo" para iniciar a contagem.';
+            nextStepBtn.disabled = false;
+            startBtn.disabled = true;
+            arrayInputEl.disabled = true;
+        }
+
+        function* algorithmGenerator() {
+            state.phase = 'counting';
+            for (let i = 0; i < state.inputArray.length; i++) {
+                state.step = i;
+                const value = state.inputArray[i];
+                
+                clearHighlights();
+                highlightCell('input', i, 'highlight-read');
+                highlightCell('count', value, 'highlight-process');
+                explanationBox.textContent = `Passo 1: Lendo o valor {value} da entrada[{i}].`;
+                yield;
+                
+                state.countArray[value]++;
+                
+                clearHighlights();
+                highlightCell('input', i, 'highlight-read');
+                highlightCell('count', value, 'highlight-write');
+                updateCell('count', value, state.countArray[value]);
+                explanationBox.textContent = `Incrementando a contagem para o valor {value}. Nova contagem: {state.countArray[value]}.`;
+                yield;
+            }
+            
+            clearHighlights();
+            explanationBox.textContent = `Contagem de frequência concluída. Próximo passo: Soma Cumulativa.`;
+            yield;
+
+            state.phase = 'summing';
+            for (let i = 1; i < state.countArray.length; i++) {
+                state.step = i;
+                
+                clearHighlights();
+                highlightCell('count', i, 'highlight-process');
+                highlightCell('count', i - 1, 'highlight-read');
+                explanationBox.textContent = `Passo 2: Calculando a soma cumulativa em contagem[{i}]. Somando {state.countArray[i]} (atual) + {state.countArray[i-1]} (anterior).`;
+                yield;
+
+                state.countArray[i] += state.countArray[i-1];
+                
+                clearHighlights();
+                highlightCell('count', i, 'highlight-write');
+                updateCell('count', i, state.countArray[i]);
+                explanationBox.textContent = `Novo valor em contagem[{i}] é {state.countArray[i]}. Isso indica a posição final para os elementos com valor {i}.`;
+                yield;
+            }
+            
+            clearHighlights();
+            explanationBox.textContent = `Soma cumulativa concluída. Próximo passo: Construção da saída.`;
+            yield;
+            
+            // Phase 3: Build Output
+            state.phase = 'building';
+            for (let i = state.inputArray.length - 1; i >= 0; i--) {
+                state.step = i;
+                const value = state.inputArray[i];
+                const pos = state.countArray[value] - 1;
+
+                clearHighlights();
+                highlightCell('input', i, 'highlight-read');
+                explanationBox.textContent = `Passo 3: Lendo o valor {value} da entrada[{i}] (do final para o início).`;
+                yield;
+
+                clearHighlights();
+                highlightCell('input', i, 'highlight-read');
+                highlightCell('count', value, 'highlight-process');
+                explanationBox.textContent = `O valor da contagem para {value} é {state.countArray[value]}. A posição de saída será {state.countArray[value]} - 1 = {pos}.`;
+                yield;
+                
+                state.outputArray[pos] = value;
+                
+                clearHighlights();
+                highlightCell('input', i, 'highlight-read');
+                highlightCell('count', value, 'highlight-process');
+                highlightCell('output', pos, 'highlight-write');
+                updateCell('output', pos, value);
+                explanationBox.textContent = `Colocando o valor {value} na saída[{pos}].`;
+                yield;
+
+                state.countArray[value]--;
+
+                clearHighlights();
+                highlightCell('output', pos, 'highlight-write');
+                highlightCell('count', value, 'highlight-process');
+                updateCell('count', value, state.countArray[value]);
+                explanationBox.textContent = `Decrementando a contagem para o valor {value} para {state.countArray[value]}.`;
+                yield;
+            }
+
+            clearHighlights();
+            explanationBox.textContent = 'Ordenação concluída!';
+            nextStepBtn.disabled = true;
+            return;
+        }
+        
+        function handleNextStep() {
+            if (!state.generator) {
+                state.generator = algorithmGenerator();
+            }
+            const result = state.generator.next();
+        }
+
+        function handleInitialState() {
+            const initialArray = arrayInputEl.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+            state.inputArray = [...initialArray];
+            const maxVal = Math.max(...initialArray, 0);
+            state.countArray = Array(maxVal + 1).fill('');
+            state.outputArray = Array(initialArray.length).fill('');
+            renderArrays();
+            explanationBox.textContent = 'Clique em "Ordenar" para começar.';
+            startBtn.disabled = false;
+            arrayInputEl.disabled = false;
+            nextStepBtn.disabled = true;
+        }
+
+        startBtn.addEventListener('click', reset);
+        nextStepBtn.addEventListener('click', handleNextStep);
+        resetBtn.addEventListener('click', () => {
+            arrayInputEl.value = '4, 1, 3, 4, 1, 8, 5, 3';
+            handleInitialState();
+        });
+
+        window.onload = handleInitialState;
+
+    </script>
+</body>
+</html>
