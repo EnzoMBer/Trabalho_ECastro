@@ -187,7 +187,7 @@
         function createCell(value, index, type) {
             const cell = document.createElement('div');
             cell.className = 'array-cell';
-            cell.dataset.id = `{type}-{index}`;
+            cell.dataset.id = `${type}-${index}`;
             
             const valueSpan = document.createElement('span');
             valueSpan.textContent = value;
@@ -219,14 +219,14 @@
         }
 
         function highlightCell(type, index, className) {
-            const cell = document.querySelector(`[data-id="{type}-{index}"]`);
+            const cell = document.querySelector(`[data-id="${type}-${index}"]`);
             if (cell) {
                 cell.classList.add(className);
             }
         }
         
         function updateCell(type, index, value) {
-             const cell = document.querySelector(`[data-id="{type}-{index}"]`);
+             const cell = document.querySelector(`[data-id="${type}-${index}"]`);
              if(cell) {
                 cell.firstChild.textContent = value;
              }
@@ -267,7 +267,7 @@
                 clearHighlights();
                 highlightCell('input', i, 'highlight-read');
                 highlightCell('count', value, 'highlight-process');
-                explanationBox.textContent = `Passo 1: Lendo o valor {value} da entrada[{i}].`;
+                explanationBox.textContent = `Passo 1: Lendo o valor ${value} da entrada[${i}].`;
                 yield;
                 
                 state.countArray[value]++;
@@ -276,7 +276,7 @@
                 highlightCell('input', i, 'highlight-read');
                 highlightCell('count', value, 'highlight-write');
                 updateCell('count', value, state.countArray[value]);
-                explanationBox.textContent = `Incrementando a contagem para o valor {value}. Nova contagem: {state.countArray[value]}.`;
+                explanationBox.textContent = `Incrementando a contagem para o valor ${value}. Nova contagem: ${state.countArray[value]}.`;
                 yield;
             }
             
@@ -291,7 +291,7 @@
                 clearHighlights();
                 highlightCell('count', i, 'highlight-process');
                 highlightCell('count', i - 1, 'highlight-read');
-                explanationBox.textContent = `Passo 2: Calculando a soma cumulativa em contagem[{i}]. Somando {state.countArray[i]} (atual) + {state.countArray[i-1]} (anterior).`;
+                explanationBox.textContent = `Passo 2: Calculando a soma cumulativa em contagem[${i}]. Somando ${state.countArray[i]} (atual) + ${state.countArray[i-1]} (anterior).`;
                 yield;
 
                 state.countArray[i] += state.countArray[i-1];
@@ -299,7 +299,7 @@
                 clearHighlights();
                 highlightCell('count', i, 'highlight-write');
                 updateCell('count', i, state.countArray[i]);
-                explanationBox.textContent = `Novo valor em contagem[{i}] é {state.countArray[i]}. Isso indica a posição final para os elementos com valor {i}.`;
+                explanationBox.textContent = `Novo valor em contagem[${i}] é ${state.countArray[i]}. Isso indica a posição final para os elementos com valor ${i}.`;
                 yield;
             }
             
@@ -316,13 +316,13 @@
 
                 clearHighlights();
                 highlightCell('input', i, 'highlight-read');
-                explanationBox.textContent = `Passo 3: Lendo o valor {value} da entrada[{i}] (do final para o início).`;
+                explanationBox.textContent = `Passo 3: Lendo o valor ${value} da entrada[${i}] (do final para o início).`;
                 yield;
 
                 clearHighlights();
                 highlightCell('input', i, 'highlight-read');
                 highlightCell('count', value, 'highlight-process');
-                explanationBox.textContent = `O valor da contagem para {value} é {state.countArray[value]}. A posição de saída será {state.countArray[value]} - 1 = {pos}.`;
+                explanationBox.textContent = `O valor da contagem para ${value} é ${state.countArray[value]}. A posição de saída será ${state.countArray[value]} - 1 = ${pos}.`;
                 yield;
                 
                 state.outputArray[pos] = value;
@@ -332,7 +332,7 @@
                 highlightCell('count', value, 'highlight-process');
                 highlightCell('output', pos, 'highlight-write');
                 updateCell('output', pos, value);
-                explanationBox.textContent = `Colocando o valor {value} na saída[{pos}].`;
+                explanationBox.textContent = `Colocando o valor ${value} na saída[${pos}].`;
                 yield;
 
                 state.countArray[value]--;
@@ -341,7 +341,7 @@
                 highlightCell('output', pos, 'highlight-write');
                 highlightCell('count', value, 'highlight-process');
                 updateCell('count', value, state.countArray[value]);
-                explanationBox.textContent = `Decrementando a contagem para o valor {value} para {state.countArray[value]}.`;
+                explanationBox.textContent = `Decrementando a contagem para o valor ${value} para ${state.countArray[value]}.`;
                 yield;
             }
 
@@ -383,5 +383,3 @@
     </script>
 </body>
 </html>
-
-
